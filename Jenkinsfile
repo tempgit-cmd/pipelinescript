@@ -12,9 +12,9 @@ pipeline {
         stage('Run Shell Script') {
             steps {
                 // Ensure script has execute permissions
-                sh 'chmod +x ./script.sh'
+                sh 'chmod +x ./s.sh'
                 // Run the script
-                sh './script.sh'
+                sh './s.sh'
             }
         }
     }
