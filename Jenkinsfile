@@ -1,30 +1,39 @@
 pipeline {
-    agent any   // Runs on any available agent/node
+    agent any
+
+    environment {
+        GIT_CREDENTIALS_ID = 'your-credentials-id'  // Replace with your Jenkins Git credentials ID
+        MAIN_BRANCH = 'main'
+    }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Feature Branch') {
             steps {
-                // If your script is in source control
-                checkout scm
+                checkout([$class: 'GitSCM', branches: [[name: "${env.BRANCH_NAME}"]],
+                          userRemoteConfigs: [[url: 'https://your-repo-url.git', credentialsId: "${env.GIT_CREDENTIALS_ID}"]]])
+                echo "Checked out feature branch: ${env.BRANCH_NAME}"
             }
         }
 
-        stage('Run Shell Script') {
+        stage('Merge Main into Feature') {
             steps {
-                // Ensure script has execute permissions
-                sh 'chmod +x ./s.sh'
-                // Run the script
-                sh './s.sh'
+                script {
+                    sh """
+                    git fetch origin ${env.MAIN_BRANCH}
+                    git merge origin/${env.MAIN_BRANCH} -m "Merge ${env.MAIN_BRANCH} into ${env.BRANCH_NAME}"
+                    """
+                    echo "Successfully merged ${env.MAIN_BRANCH} into ${env.BRANCH_NAME}!"
+                }
             }
         }
     }
 
     post {
         success {
-            echo '✅ Script executed successfully!'
+            echo "Feature branch pipeline completed successfully!"
         }
         failure {
-            echo '❌ Script execution failed.'
+            echo "Merge failed. Please resolve conflicts manually."
         }
     }
 }
