@@ -1,12 +1,21 @@
 pipeline {
     agent any
+
     stages {
-        stage('Build Main') {
+        stage('Checkout Main') {
             steps {
-                echo "Building the main branch..."
+                checkout scm
+            }
+        }
+
+        stage('Run Script') {
+            steps {
+                sh 'chmod +x s.sh'
+                sh './s.sh'
             }
         }
     }
+
     post {
         success {
             echo "Main branch build successful!"
